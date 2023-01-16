@@ -1,0 +1,15 @@
+OpenSSH: 22, 225
+Stunnel: 443
+Dropbear: 550, 555
+OpenVPN: 110(TCP), 1194(UDP)
+Squid: 8000, 8080
+Websocket: 80, 8043, 8280, 8243, 8443, 9443
+SSH DNS: sgc353.fcafessh.net
+WS DNS: sgc353.ws.fcafessh.net
+SlowDNS: dns.sgc353.fcafessh.net
+Public Key: 99242c9fe50d6e08e95bbf30e4bd11e648e283ba8d05610bb64e3176adfc0555
+
+http://172.104.191.95:86/tcp.ovpn
+http://172.104.191.95:86/udp.ovpn
+http://172.104.191.95:86/OHPTCPConfig.ovpn
+http://172.104.191.95:86/OHPTCPConfig2.ovpn
