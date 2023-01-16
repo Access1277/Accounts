@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ConfigFile</title>
+</head>
+<body>
+<br>
+<font><h3>LINODE SERVER CONFIG FILE</font></h3>
+<font><h5><p>OpenSSH: 22</p>
+<p>Stunnel: 443</p>
+<p>Dropbear: 550,555</p>
+<p>OpenVPN: 110(TCP),1194(UDP)</p>
+<p>Squid: 8000,8080</p>
+<p>Websocket: 80</p>
+<p>SSH DNS: sgc353.fcafessh.net</p>
+<p>WS DNS: sgc353.ws.fcafessh.net</p>
+<p>SlowDNS: dns.sgc353.fcafessh.net</p>
+<p>Public Key: 99242c9fe50d6e08e95bbf30e4bd11e648e283ba8d05610bb64e3176adfc0555</p>
+<p>http://172.104.191.95:86/tcp.ovpn</p>
+<p>http://172.104.191.95:86/udp.ovpn</p>
+<p>http://172.104.191.95:86/OHPTCPConfig.ovpn</p>
+<p>http://172.104.191.95:86/OHPTCPConfig2.ovpn<br></font></h5>
+</body>
+</html>
