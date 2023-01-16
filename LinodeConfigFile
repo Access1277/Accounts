@@ -1,9 +1,11 @@
-OpenSSH: 22, 225
+Linode SG Server
+
+OpenSSH: 22
 Stunnel: 443
-Dropbear: 550, 555
+Dropbear: 550
 OpenVPN: 110(TCP), 1194(UDP)
 Squid: 8000, 8080
-Websocket: 80, 8043, 8280, 8243, 8443, 9443
+Websocket: 80
 SSH DNS: sgc353.fcafessh.net
 WS DNS: sgc353.ws.fcafessh.net
 SlowDNS: dns.sgc353.fcafessh.net
@@ -13,3 +15,11 @@ http://172.104.191.95:86/tcp.ovpn
 http://172.104.191.95:86/udp.ovpn
 http://172.104.191.95:86/OHPTCPConfig.ovpn
 http://172.104.191.95:86/OHPTCPConfig2.ovpn
+
+DIGITAL OCEAN SG SERVER👇
+
+http://159.89.207.133:86/
+
+DIGITAL OCEAN USA SERVER👇
+
+http://134.122.23.152:86/
