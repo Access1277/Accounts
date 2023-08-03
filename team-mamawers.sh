@@ -12,7 +12,7 @@ cat << info
 
  ==================================
 |           SocksProxy             |
-|    by Dexter Cellona Banawon     |
+|    by TEAM MAMAWERS     |
  ==================================
    - Client Auto-Disconnect
    - Multiport
@@ -374,7 +374,7 @@ sport = $ws_ovpn
 dport = $ovpn
 basic
 
-echo "<font color=\"green\">Dexter Cellona Banawon (X-DCB)</font>" > $loc/message
+echo "<font color=\"green\">👊TEAM MAMAWERS👊</font>" > $loc/message
 
 web=$loc/web
 mkdir $web 2> /dev/null
@@ -496,9 +496,9 @@ docker run -d --restart always --name badvpn \
  --entrypoint "badvpn-udpgw" \
  xdcb/vpn:badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 10
 
-echo "Adding menu 'xdcb'."
+echo "Adding menu 'team'."
 bin=/usr/local/bin
-cat << 'menu' > $bin/xdcb
+cat << 'menu' > $bin/team
 #!/bin/bash
 if [ "$(id -u)" -ne 0 ]; then
   echo -ne "\nPlease execute this script as root.\n"
@@ -578,7 +578,7 @@ cat << msg
      - accadd
      - acclist
      - accdel
-| Usage: xdcb [option]
+| Usage: team [option]
 
 Credits: Dexter Cellona Banawon (X-DCB)
 msg
@@ -588,7 +588,7 @@ menu
 chmod a+x $bin/*
 
 cd; echo "Optimizing server."
-cat << sysctl > /etc/sysctl.d/xdcb.conf
+cat << sysctl > /etc/sysctl.d/team.conf
 net.ipv4.ip_forward=1
 net.ipv4.tcp_rmem=65535 131072 4194304
 net.ipv4.tcp_wmem=65535 131072 4194304
@@ -624,9 +624,8 @@ cat << info | tee ~/socksproxylog.txt
 |         2083 (WS + OpenVPN)         |
 | Log output: /root/socksproxylog.txt |
 | =================================== |
-| Use "xdcb" for the menu             |
-| Contact me @                        |
-|    - https://fb.me/theMovesFever    |
+| Use "team" for the menu             |
+| Ex. team accadd  (to create)      |
  =====================================
  
 info
