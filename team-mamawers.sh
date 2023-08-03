@@ -11,8 +11,8 @@ if [ ! -f /etc/debian* ]; then
 cat << info
 
  ==================================
-|           SocksProxy             |
-|    by TEAM MAMAWERS     |
+|             SocksProxy           |
+|         👊TEAM MAMAWERS👊        |
  ==================================
    - Client Auto-Disconnect
    - Multiport
@@ -374,7 +374,7 @@ sport = $ws_ovpn
 dport = $ovpn
 basic
 
-echo "<font color=\"green\">👊TEAM MAMAWERS👊</font>" > $loc/message
+echo "<font color=\"blue\">👊TEAM MAMAWERS👊</font>" > $loc/message
 
 web=$loc/web
 mkdir $web 2> /dev/null
