@@ -29,7 +29,7 @@ sport = 8880
 dport = 1194
 basic
 fi
-[ -f $loc/message ] || echo "<font color=\"green\">Dexter Cellona Banawon (X-DCB)</font>" > $loc/message
+[ -f $loc/message ] || echo "<font color=\"green\">👊TEAM MAMAWERS👊</font>" > $loc/message
 rm -f $loc/.firstrun
 systemctl stop socksproxy
 docker rm -f $cont
