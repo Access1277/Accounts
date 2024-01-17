@@ -38,6 +38,8 @@ CUSTOM_DIG=/data/data/com.termux/files/home/go/bin/fastdig
 ######################################
 ######################################
 
+VER=0.1
+
 case "${DIG_EXEC}" in
 DEFAULT|D)
     _DIG="$(command -v dig)"
@@ -47,8 +49,8 @@ CUSTOM|C)
     ;;
 esac
 
-if ! "${_DIG}" --version > /dev/null 2>&1; then
-    printf "Dig command failed to run, please install dig (dnsutils) or check DIG_EXEC & CUSTOM_DIG variables inside %s/$(basename "$0") file.\n" "$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit ; pwd -P )"
+if [ ! $(command -v ${_DIG}) ]; then
+    printf "Dig command failed to run, please install dig (dnsutils) or check DIG_EXEC & CUSTOM_DIG variables inside $( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/$(basename "$0") file.\n"
     exit 1
 fi
 
@@ -66,11 +68,11 @@ check() {
             R="${server}"
             
             # Add ping and host lookup
-            (ping -c 1 "${T}" &  # Ping the nameserver in the background
-            host "${R}" &)  # Host lookup in the background
+            ping -c 1 "${T}" &  # Ping the nameserver in the background
+            host "${R}" &  # Host lookup in the background
             
-            timeout -k 3 3 "${_DIG}" @"${T}" "${R}"  # Remove the domain name
-            if "${_DIG}" @"${T}" "${R}"; then
+            timeout -k 3 3 ${_DIG} @${T} "${R}"  # Remove the domain name
+            if [ $? -eq 0 ]; then
                 M=32
             else
                 M=31
@@ -88,11 +90,11 @@ done
 echo "CTRL + C to close script"
 
 if [ "${LOOP_DELAY}" -eq 1 ]; then
-    (( LOOP_DELAY++ ))
+    let "LOOP_DELAY++"
 fi
 
 while true; do
     check
     echo '.--. .-.. . .- ... .     .-- .- .. -'
-    sleep "${LOOP_DELAY}"
+    sleep ${LOOP_DELAY}
 done
