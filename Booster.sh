@@ -1,0 +1,98 @@
+#!/bin/bash
+
+## Copyright ©UDPTeam
+
+## Discord: https://discord.gg/civ3
+
+## Script to keep-alive your DNSTT server domain record query from target resolver/local dns server
+
+## Run this script excluded from your VPN tunnel (split VPN tunneling mode)
+
+## run command: ./globe-J_Kim.sh l
+
+## Repeat dig command loop time (seconds) (positive integer only)
+
+LOOP_DELAY=5
+
+## Define the aligned nameservers and hosts
+
+declare -A SERVERS=(
+    ["sdns.myudp.elcavlaw.com"]="124.6.181.20 124.6.181.36 124.6.181.12 124.6.181.4"
+    ["sdns.myudp1.elcavlaw.com"]="124.6.181.20 124.6.181.36 124.6.181.12 124.6.181.4"
+    ["sdns.myudp2.elcavlaw.com"]="124.6.181.20 124.6.181.36 124.6.181.12 124.6.181.4"
+    ["sdns.myudph.elcavlaw.com"]="124.6.181.20 124.6.181.36 124.6.181.12 124.6.181.4"
+)
+
+## Linux' dig command executable filepath
+## Select value: "CUSTOM|C" or "DEFAULT|D"
+
+DIG_EXEC="DEFAULT"
+
+## if set to CUSTOM, enter your custom dig executable path here
+
+CUSTOM_DIG=/data/data/com.termux/files/home/go/bin/fastdig
+
+######################################
+######################################
+######################################
+######################################
+######################################
+
+case "${DIG_EXEC}" in
+DEFAULT|D)
+    _DIG="$(command -v dig)"
+    ;;
+CUSTOM|C)
+    _DIG="${CUSTOM_DIG}"
+    ;;
+esac
+
+if ! "${_DIG}" --version > /dev/null 2>&1; then
+    printf "Dig command failed to run, please install dig (dnsutils) or check DIG_EXEC & CUSTOM_DIG variables inside %s/$(basename "$0") file.\n" "$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit ; pwd -P )"
+    exit 1
+fi
+
+endscript() {
+    unset LOOP_DELAY SERVERS _DIG DIG_EXEC T R M
+    exit 1
+}
+
+trap endscript 2 15
+
+check() {
+    for server in "${!SERVERS[@]}"; do
+        for host in ${SERVERS["$server"]}; do
+            T="${host}"
+            R="${server}"
+            
+            # Add ping and host lookup
+            (ping -c 1 "${T}" &  # Ping the nameserver in the background
+            host "${R}" &)  # Host lookup in the background
+            
+            timeout -k 3 3 "${_DIG}" @"${T}" "${R}"  # Remove the domain name
+            if "${_DIG}" @"${T}" "${R}"; then
+                M=32
+            else
+                M=31
+            fi
+            echo -e "\e[${M}m:${R} D:${T}\e[0m"
+        done
+    done
+}
+
+echo "DNSTT Keep-Alive script <Discord @civ3>"
+echo "DNS List:"
+for server in "${!SERVERS[@]}"; do
+    echo -e "\e[34m${server}\e[0m -> ${SERVERS["$server"]}"
+done
+echo "CTRL + C to close script"
+
+if [ "${LOOP_DELAY}" -eq 1 ]; then
+    (( LOOP_DELAY++ ))
+fi
+
+while true; do
+    check
+    echo '.--. .-.. . .- ... .     .-- .- .. -'
+    sleep "${LOOP_DELAY}"
+done
