@@ -64,8 +64,20 @@ class="list-group"><li class="list-group-item justify-content-between align-item
         </a>
     </div>
 </li>
+<script>
+    function copyToClipboard(elementId) {
+        var copyText = document.getElementById(elementId);
+        var textArea = document.createElement("textarea");
+        textArea.value = copyText.textContent;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+    }
+</script>
+
 <div>
-    <button onclick="copyToClipboard('code1')">Copy Code</button>
+    <button onclick="copyToClipboard('code1')"><font color="green">Copy Code For NetMod Syna👈</button></font>
     <div id="code1" style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 8px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background-color: #f0f8ff;">
         nm-dns://SuC/cOEQiybUOq/uahZW+031JCB6mIAivoIbtXPxtsTf7IVTNh/Mv1i01wKwfXgdkqlVrfnq0hrSkLA4KyXFgzlaISiQ98uCHkh39sYB9odeRr7PNUaPB9ErvLz/j7opk1r+aRv0Vw3a5NwvdLfxLXtYbWTHLK5Ykpp6tkoT/kQ0J7q11hIlJ4OkzeHg+JS6Sujc/Knoy61+2MFuVOCrsL4EKC0cB1YECG3cvpfZ07c=
     </div>
