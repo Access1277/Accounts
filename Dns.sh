@@ -11,3 +11,9 @@ if [ -n "$result" ]; then
 else
     echo "No DNS records found for $domain"
 fi
+
+# Keep-alive
+while true; do
+    ping -c 1 google.com > /dev/null
+    sleep 5  # Adjust the sleep duration as needed (300 seconds in this example)
+done
