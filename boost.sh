@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Your DNSTT Nameserver & your Domain `A` Record
-A='dnstt.lantindns.tech'
+NS='dnstt.lantindns.tech'
 
 # Repeat dig cmd loop time (seconds)
 LOOP_DELAY=1
