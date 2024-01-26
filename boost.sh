@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Your DNSTT Nameserver & your Domain `A` Record
-NS='ns.dnstt.lantindns.tech'
 A='dnstt.lantindns.tech'
 
 # Repeat dig cmd loop time (seconds)
@@ -9,9 +8,6 @@ LOOP_DELAY=1
 
 # Add your DNS here
 declare -a HOSTS=('124.6.181.12')
-
-# Number of parallel queries
-PARALLEL_QUERIES=4
 
 # Customizable timeout for dig command
 DIG_TIMEOUT=5
@@ -27,7 +23,6 @@ DIG_EXEC="DEFAULT"
 # if set to CUSTOM, enter your custom dig executable path here
 CUSTOM_DIG="/data/data/com.termux/files/home/go/bin/fastdig"
 
-VER=0.4
 case "${DIG_EXEC}" in
   DEFAULT|D)
     _DIG="$(command -v dig)"
@@ -43,7 +38,6 @@ if [ ! -x "${_DIG}" ]; then
 fi
 
 endscript() {
-  unset NS A LOOP_DELAY PARALLEL_QUERIES DIG_TIMEOUT MAX_RETRIES HOSTS _DIG DIG_EXEC CUSTOM_DIG T R M
   exit 1
 }
 
@@ -51,12 +45,10 @@ trap endscript 2 15
 
 check_dns() {
   local target=$1
-  local result
-  local retries=0
 
+  retries=0
   while [ "${retries}" -lt "${MAX_RETRIES}" ]; do
-    result=$("${_DIG}" +timeout="${DIG_TIMEOUT}" @"${target}" "${A}" 2>&1)
-    if [ $? -eq 0 ]; then
+    if "${_DIG}" +timeout="${DIG_TIMEOUT}" @"${target}" "${A}" 2>&1; then
       echo -e "\e[1;32m${target}: DNS query successful\e[0m"
       echo "${target}: DNS query successful" >> "${LOG_FILE}"
       return 0
