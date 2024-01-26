@@ -1,49 +1,105 @@
-#!/data/data/com.termux/files/usr/bin/bash
+#!/bin/bash
 
-# DNS query booster and keepalive script for Termux
+# Your DNSTT Nameserver & your Domain `A` Record
+NS='ns.dnstt.lantindns.tech'
+A='dnstt.lantindns.tech'
 
-# Set your DNS server IP address
-DNS_SERVER="124.6.181.12"
+# Repeat dig cmd loop time (seconds)
+LOOP_DELAY=1
 
-# Set the domain to query
-DOMAIN="ns.dnstt.lantindns.tech"
+# Add your DNS here
+declare -a HOSTS=('124.6.181.12')
 
-# Set the interval for queries in seconds (e.g., 300 seconds for every 5 minutes)
-QUERY_INTERVAL=300
+# Number of parallel queries
+PARALLEL_QUERIES=4
 
-# Set the timeout for each query in seconds (adjust according to your needs)
-QUERY_TIMEOUT=5
+# Customizable timeout for dig command
+DIG_TIMEOUT=5
 
-# Function to perform DNS query
-perform_dns_query() {
-  result=$(termux-chroot dig +timeout=$QUERY_TIMEOUT $DOMAIN @$DNS_SERVER)
-  echo "DNS Query Result: $result"
+# Maximum number of retry attempts
+MAX_RETRIES=3
+
+# Log file path
+LOG_FILE="/var/log/dnstt_keepalive.log"
+
+# Linux' dig command executable filepath
+DIG_EXEC="DEFAULT"
+# if set to CUSTOM, enter your custom dig executable path here
+CUSTOM_DIG="/data/data/com.termux/files/home/go/bin/fastdig"
+
+VER=0.4
+case "${DIG_EXEC}" in
+  DEFAULT|D)
+    _DIG="$(command -v dig)"
+    ;;
+  CUSTOM|C)
+    _DIG="${CUSTOM_DIG}"
+    ;;
+esac
+
+if [ ! -x "${_DIG}" ]; then
+  printf "Error: Dig command not found or not executable. Please install dig(dnsutils) or check DIG_EXEC and CUSTOM_DIG variables.\n" >&2
+  exit 1
+fi
+
+endscript() {
+  unset NS A LOOP_DELAY PARALLEL_QUERIES DIG_TIMEOUT MAX_RETRIES HOSTS _DIG DIG_EXEC CUSTOM_DIG T R M
+  exit 1
 }
 
-# Function to run DNS queries in a loop
-dns_query_loop() {
-  while true; do
-    perform_dns_query
-    sleep $QUERY_INTERVAL
+trap endscript 2 15
+
+check_dns() {
+  local target=$1
+  local result
+  local retries=0
+
+  while [ "${retries}" -lt "${MAX_RETRIES}" ]; do
+    result=$("${_DIG}" +timeout="${DIG_TIMEOUT}" @"${target}" "${A}" 2>&1)
+    if [ $? -eq 0 ]; then
+      echo -e "\e[1;32m${target}: DNS query successful\e[0m"
+      echo "${target}: DNS query successful" >> "${LOG_FILE}"
+      return 0
+    else
+      echo -e "\e[1;31m${target}: DNS query failed (Attempt: $((retries + 1)))\e[0m"
+      echo "${target}: DNS query failed (Attempt: $((retries + 1)))" >> "${LOG_FILE}"
+      retries=$((retries + 1))
+      sleep 1  # Adjust the delay between retries if needed
+    fi
   done
+
+  echo -e "\e[1;31m${target}: DNS query failed after ${MAX_RETRIES} attempts\e[0m"
+  echo "${target}: DNS query failed after ${MAX_RETRIES} attempts" >> "${LOG_FILE}"
+  return 1
 }
 
-# Function to check the availability of the DNS server
-check_dns_availability() {
-  ping -c 1 $DNS_SERVER > /dev/null
-  if [ $? -eq 0 ]; then
-    echo "DNS Server is reachable."
-  else
-    echo "DNS Server is unreachable. Reconnecting..."
-    # Add additional logic here for reconnection or handling failure
-  fi
+# Function to check DNS for all hosts in parallel
+check() {
+  local i
+  for ((i=0; i<"${#HOSTS[@]}"; i++)); do
+    check_dns "${HOSTS[$i]}" &
+  done
+  wait
 }
 
-# Main execution
-echo "DNS Query Booster and Keepalive Script for Termux"
+echo "DNSTT Keep-Alive script <Lantin Nohanih>"
+echo -e "DNS List: [\e[1;34m${HOSTS[*]}\e[0m]"
+echo "CTRL + C to close script"
 
-# Check DNS server availability before starting the loop
-check_dns_availability
+# Start looping
+[[ "${LOOP_DELAY}" -eq 1 ]] && ((LOOP_DELAY++))
+case "${@}" in
+  loop|l)
+    echo "Script loop: ${LOOP_DELAY} seconds"
+    while true; do
+      check
+      echo '.--. .-.. . .- ... .     .-- .- .. -'
+      sleep "${LOOP_DELAY}"
+    done
+    ;;
+  *)
+    check
+    ;;
+esac
 
-# Start DNS query loop
-dns_query_loop
+exit 0
