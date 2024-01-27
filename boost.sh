@@ -2,7 +2,7 @@
 
 TARGET_IP="124.6.181.12"
 PING_INTERVAL=60
-LOG_FILE="/path/to/log.txt"
+LOG_FILE="https://github.com/Access1277/Accounts/pull/1#issue-2103868059"
 
 while true; do
     ping -c 1 $TARGET_IP > /dev/null
