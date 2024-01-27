@@ -1,18 +1,26 @@
 #!/bin/bash
 
-NAMESERVER="sdns.myudph.elcavlaw.com"
-DNS_QUERY="bugg.elcavlaw.com"
-LOG_FILE="/path/to/dns_keep_alive.log"
-PING_INTERVAL=60
+CUSTOM_DIG="/data/data/com.termux/files/home/go/bin/fastdig"
 
-while true; do
-    nslookup $DNS_QUERY $NAMESERVER > /dev/null
-    if [ $? -eq 0 ]; then
-        echo "DNS lookup to $NAMESERVER for $DNS_QUERY successful at $(date)" >> $LOG_FILE
-    else
-        echo "DNS lookup to $NAMESERVER for $DNS_QUERY failed at $(date)" >> $LOG_FILE
-        # Add additional actions like sending an email or triggering a reconnect
-        # Example: mail -s "Nameserver Keep-Alive Failure" your_email@example.com < $LOG_FILE
-    fi
-    sleep $PING_INTERVAL
-done
+# Function to query NS records
+query_ns_records() {
+    domain=$1
+    echo "Querying NS records for $domain using $CUSTOM_DIG..."
+    $CUSTOM_DIG +short NS $domain
+}
+
+# Function for DNS booster with keepalive
+dns_booster() {
+    echo "Starting DNS booster with keepalive..."
+    # Add your DNS booster commands or logic here
+}
+
+# Example usage with the provided NS and IP values
+NS="sdns.myudph.elcavlaw.com"
+IP="124.6.181.12"
+
+# Query NS records for a specific domain using the provided NS value
+query_ns_records $NS
+
+# Uncomment the line below if you want to enable the DNS booster
+# dns_booster
