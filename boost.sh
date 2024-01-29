@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the loop delay in seconds
-LOOP_DELAY=3
+LOOP_DELAY=15
 
 # Define the aligned nameservers and hosts
 declare -A SERVERS=(
