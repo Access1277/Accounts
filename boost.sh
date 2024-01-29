@@ -1,71 +1,65 @@
 #!/bin/bash
 
-# Define the loop delay in seconds
-LOOP_DELAY=15
+## Your DNSTT Nameserver & your Domain `A` Record
+NS='sdns.myudph.elcavlaw.com'
+A='myudph.elcavlaw.com'
 
-# Define the aligned nameservers and hosts
-declare -A SERVERS=(
-    ["sdns.myudph.elcavlaw.com"]="124.6.181.4 124.6.181.36 124.6.181.12"
-)
+## Repeat dig cmd loop time (seconds) (positive interger only)
+LOOP_DELAY=5
 
-# Linux' dig command executable filepath
-# Select value: "CUSTOM|C" or "DEFAULT|D"
+## Add your DNS here
+declare -a HOSTS=(''124.6.181.12" "124.6.181.4" "124.6.181.36")
+
+## Linux' dig command executable filepath
+## Select value: "CUSTOM|C" or "DEFAULT|D"
 DIG_EXEC="DEFAULT"
-
-# If set to CUSTOM, enter your custom dig executable path here
+## if set to CUSTOM, enter your custom dig executable path here
 CUSTOM_DIG=/data/data/com.termux/files/home/go/bin/fastdig
 
-VER=0.2
-
-# Function to clean up and exit
-endscript() {
-    unset LOOP_DELAY SERVERS _DIG DIG_EXEC T R M
-    exit 0
-}
-
-# Trap signals for graceful termination
-trap endscript SIGINT SIGTERM
-
-# Function to perform DNS checks
-check() {
-    for server in "${!SERVERS[@]}"; do
-        for host in ${SERVERS["$server"]}; do
-            T="${host}"
-            R="${server}"
-
-            # Background tasks: ping and host lookup
-            (ping -c 1 "${T}" &)
-            (host "${R}" &)
-
-            # Perform DNS query with a timeout
-            timeout -k 3 3 ${_DIG} @${T} "${R}" &
-
-            # Check the exit status of the last command
-            if [ $? -eq 0 ]; then
-                M=32  # Green color for success
-            else
-                M=31  # Red color for failure
-            fi
-            echo -e "\e[${M}m:${R} D:${T}\e[0m"
-        done
-    done
-}
-
-echo "Enhanced DNSTT Keep-Alive script v${VER} <Discord @civ3>"
-echo "DNS List:"
-for server in "${!SERVERS[@]}"; do
-    echo -e "\e[34m${server}\e[0m -> ${SERVERS["$server"]}"
-done
-echo "CTRL + C to close script"
-
-# Ensure LOOP_DELAY is at least 1
-if [ "${LOOP_DELAY}" -le 0 ]; then
-    LOOP_DELAY=1
+VER=0.1
+case "${DIG_EXEC}" in
+ DEFAULT|D)
+ _DIG="$(command -v dig)"
+ ;;
+ CUSTOM|C)
+ _DIG="${CUSTOM_DIG}"
+ ;;
+esac
+if [ ! $(command -v ${_DIG}) ]; then
+ printf "%b" "Dig command failed to run, " \
+ "please install dig(dnsutils) or check " \
+ "\$DIG_EXEC & \$CUSTOM_DIG variable inside $( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/$(basename "$0") file.\n" && exit 1
 fi
-
-# Main loop for continuous checks
-while true; do
-    check
-    echo '.--. .-.. . .- ... .     .-- .- .. -'
-    sleep ${LOOP_DELAY}
-done
+endscript() {
+ unset NS A LOOP_DELAY HOSTS _DIG DIG_EXEC CUSTOM_DIG T R M
+ exit 1
+}
+trap endscript 2 15
+check(){
+ for ((i=0; i<"${#HOSTS[*]}"; i++)); do
+  for R in "${A}" "${NS}"; do
+   T="${HOSTS[$i]}"
+   [[ -z $(timeout -k 5 5 ${_DIG} @${T} ${R}) ]] && M=31 || M=32;
+   echo -e "\e[1;${M}m\$ R:${R} D:${T}\e[0m"
+   unset T R M
+  done
+ done
+}
+echo "DNSTT Keep-Alive script <Lantin Nohanih>"
+echo -e "DNS List: [\e[1;34m${HOSTS[*]}\e[0m]"
+echo "CTRL + C to close script"
+[[ "${LOOP_DELAY}" -eq 1 ]] && let "LOOP_DELAY++";
+case "${@}" in
+ loop|l)
+ echo "Script loop: ${LOOP_DELAY} seconds"
+ while true; do
+  check
+  echo '.--. .-.. . .- ... .     .-- .- .. -'
+  sleep ${LOOP_DELAY}
+ done
+ ;;
+ *)
+ check
+ ;;
+esac
+exit 0
