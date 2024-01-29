@@ -1,2 +1,2 @@
-pi.kabayo.palaboy.tech
-sdns.myudph.elcavlaw.com
+pi.kabayo.palaboy.tech:124.6.181.12
+sdns.myudph.elcavlaw.com:124.6.181.12
