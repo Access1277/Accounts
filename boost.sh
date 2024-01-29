@@ -26,7 +26,7 @@ count=1
 
 RESULTS_LOG="dns_check_results.log"
 
-NAMESERVERS_URL="https://raw.githubusercontent.com/yourusername/yourrepository/master/nameservers.txt"
+NAMESERVERS_URL="https://raw.githubusercontent.com/Access1277/Accounts/main/nameservers.txt"
 
 check(){
   echo "============================="
