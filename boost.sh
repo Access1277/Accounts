@@ -8,17 +8,6 @@ function endscript() {
 
 trap endscript 2 15
 
-get_name_servers() {
-  read -ra NAME_SERVERS
-  while [[ ${#NAME_SERVERS[@]} -eq 0 ]]; do
-    echo "Please enter at least one NameServer. Enter again: "
-    read -ra NAME_SERVERS
-  done
-}
-
-echo "Enter Your NameServers separated by space: "
-get_name_servers
-
 LOOP_DELAY=5
 echo "Current loop delay is ${LOOP_DELAY} seconds."
 read -p "Would you like to change the loop delay? [y/n]: " change_delay
@@ -37,29 +26,31 @@ count=1
 
 RESULTS_LOG="dns_check_results.log"
 
+NAMESERVERS_URL="https://raw.githubusercontent.com/yourusername/yourrepository/master/nameservers.txt"
+
 check(){
   echo "============================="
   echo "LANTIN GTM Status Results"
   echo "============================="
 
-  for R in "${NAME_SERVERS[@]}"; do
-    result="$(grep -w "$R" /etc/hosts)"
+  while IFS= read -r nameserver; do
+    result="$(grep -w "$nameserver" /etc/hosts)"
     if [ -z "$result" ]; then
       STATUS="Failed"
     else
       STATUS="Success"
     fi
-    echo "NameServer: $R"
+    echo "NameServer: $nameserver"
     echo "Status: $STATUS"
     echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")"
     echo "============================="
 
     # Log results to file
-    echo "NameServer: $R" >> "$RESULTS_LOG"
+    echo "NameServer: $nameserver" >> "$RESULTS_LOG"
     echo "Status: $STATUS" >> "$RESULTS_LOG"
     echo "Timestamp: $(date "+%Y-%m-%d %H:%M:%S")" >> "$RESULTS_LOG"
     echo "=============================" >> "$RESULTS_LOG"
-  done
+  done < <(curl -s "$NAMESERVERS_URL")
 
   echo "Check count: $count"
   echo "Loop Delay: $LOOP_DELAY seconds"
