@@ -3,23 +3,10 @@
 clear
 
 function endscript() {
-  echo -e "\nExiting script..."
-  exit 0
+  exit 1
 }
 
-trap endscript SIGINT SIGTERM
-
-# Welcome animation
-welcome_animation() {
-  local welcome_text="Welcome"
-  for ((i = 0; i < ${#welcome_text}; i++)); do
-    echo -n "${welcome_text:$i:1}"
-    sleep 0.2
-  done
-  echo ""
-}
-
-welcome_animation
+trap endscript 2 15
 
 echo -e "\e[1;37mEnter DNS IPs separated by ' ': \e[0m"
 read -a DNS_IPS
@@ -100,19 +87,21 @@ check(){
 }
 
 countdown() {
-    for i in 15 0; do
+    for i in 1 0; do
         echo "Checking started in $i seconds..."
         sleep 1
     done
 }
 
+
+countdown
+  clear
+
 # Main loop
 while true; do
-  countdown
-  clear
   check
   ((count++))  # Increment the counter
-  sleep $LOOP_DELAY || exit 1  # Exit if sleep fails
+  sleep $LOOP_DELAY
 done
 
 exit 0
