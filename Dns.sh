@@ -27,7 +27,7 @@ read -a DNS_IPS
 echo -e "\e[1;37mEnter Your NameServers separated by ' ': \e[0m"
 read -a NAME_SERVERS
 
-LOOP_DELAY=1
+LOOP_DELAY=4
 echo -e "\e[1;37mCurrent loop delay is \e[1;33m${LOOP_DELAY}\e[1;37m seconds.\e[0m"
 echo -e "\e[1;37mWould you like to change the loop delay? \e[1;36m[y/n]:\e[0m "
 read -r change_delay
