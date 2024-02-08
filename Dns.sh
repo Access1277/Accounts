@@ -1,82 +1,118 @@
 #!/bin/bash
 
-# Copyright ©UDPTeam
-# Discord: https://discord.gg/civ3
-# Script to keep-alive your DNSTT server domain record query from target resolver/local dns server
-# Run this script excluded from your VPN tunnel (split VPN tunneling mode)
-# Run command: ./globe-J_Kim.sh l
-# Repeat dig command loop time (seconds) (positive integer only)
-LOOP_DELAY=5
+clear
 
-# Define the aligned nameservers and hosts
-declare -A SERVERS=(
-    ["ns.dnstt.lantindns.tech"]="124.6.181.12 124.6.181.4"
-)
+function endscript() {
+  echo -e "\nExiting script..."
+  exit 0
+}
 
-# Linux' dig command executable filepath
-# Select value: "CUSTOM|C" or "DEFAULT|D"
+trap endscript SIGINT SIGTERM
+
+# Welcome animation
+welcome_animation() {
+  local welcome_text="Welcome"
+  for ((i = 0; i < ${#welcome_text}; i++)); do
+    echo -n "${welcome_text:$i:1}"
+    sleep 0.2
+  done
+  echo ""
+}
+
+welcome_animation
+
+echo -e "\e[1;37mEnter DNS IPs separated by ' ': \e[0m"
+read -a DNS_IPS
+
+echo -e "\e[1;37mEnter Your NameServers separated by ' ': \e[0m"
+read -a NAME_SERVERS
+
+LOOP_DELAY=1
+echo -e "\e[1;37mCurrent loop delay is \e[1;33m${LOOP_DELAY}\e[1;37m seconds.\e[0m"
+echo -e "\e[1;37mWould you like to change the loop delay? \e[1;36m[y/n]:\e[0m "
+read -r change_delay
+
+if [[ "$change_delay" == "y" ]]; then
+  echo -e "\e[1;37mEnter custom loop delay in seconds \e[1;33m(5-15):\e[0m "
+  read -r custom_delay
+  if [[ "$custom_delay" =~ ^[5-9]$|^1[0-5]$ ]]; then
+    LOOP_DELAY=$custom_delay
+  else
+    echo -e "\e[1;31mInvalid input. Using default loop delay of ${LOOP_DELAY} seconds.\e[0m"
+  fi
+fi
+
 DIG_EXEC="DEFAULT"
-
-# If set to CUSTOM, enter your custom dig executable path here
 CUSTOM_DIG=/data/data/com.termux/files/home/go/bin/fastdig
-
-VER=0.1
+VER=0.3
 
 case "${DIG_EXEC}" in
-DEFAULT|D)
+  DEFAULT|D)
     _DIG="$(command -v dig)"
     ;;
-CUSTOM|C)
+  CUSTOM|C)
     _DIG="${CUSTOM_DIG}"
     ;;
 esac
 
 if [ ! $(command -v ${_DIG}) ]; then
-    printf "Dig command failed to run, please install dig (dnsutils) or check DIG_EXEC & CUSTOM_DIG variables inside $( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )/$(basename "$0") file.\n"
-    exit 1
+  printf "%b" "Dig command failed to run, please install dig(dnsutils) or check the DIG_EXEC & CUSTOM_DIG variable.\n" && exit 1
 fi
 
-endscript() {
-    unset LOOP_DELAY SERVERS _DIG DIG_EXEC T R M
-    exit 1
-}
+# Initialize the counter
+count=1
 
-trap endscript 2 15
+check(){
+  local border_color="\e[95m"  # Light magenta color
+  local success_color="\e[92m"  # Light green color
+  local fail_color="\e[91m"    # Light red color
+  local header_color="\e[96m"  # Light cyan color
+  local reset_color="\e[0m"    # Reset to default terminal color
+  local padding="  "            # Padding for aesthetic
 
-check() {
-    for server in "${!SERVERS[@]}"; do
-        for host in ${SERVERS["$server"]}; do
-            T="${host}"
-            R="${server}"
-            
-            # Combine ping and host lookup into a single background command
-            { ping -c 1 "${T}" & host "${R}" & } > /dev/null
-            
-            timeout -k 3 3 ${_DIG} @${T} "${R}" > /dev/null  # Remove the domain name
-            if [ $? -eq 0 ]; then
-                M=32
-            else
-                M=31
-            fi
-            echo -e "\e[${M}m:${R} D:${T}\e[0m"
-        done &
+  # Header
+  echo -e "${border_color}┌────────────────────────────────────────────────┐${reset_color}"
+  echo -e "${border_color}│${header_color}${padding}DNS Status Check Results${padding}${reset_color}"
+  echo -e "${border_color}├────────────────────────────────────────────────┤${reset_color}"
+  
+  # Results
+  for T in "${DNS_IPS[@]}"; do
+    for R in "${NAME_SERVERS[@]}"; do
+      result=$(${_DIG} @${T} ${R} +short)
+      if [ -z "$result" ]; then
+        STATUS="${fail_color}Failed${reset_color}"
+      else
+        STATUS="${success_color}Success${reset_color}"
+      fi
+      echo -e "${border_color}│${padding}${reset_color}DNS IP: ${T}${reset_color}"
+      echo -e "${border_color}│${padding}NameServer: ${R}${reset_color}"
+      echo -e "${border_color}│${padding}Status: ${STATUS}${reset_color}"
     done
-    wait  # Wait for all background processes to finish
+  done
+
+  # Check count and Loop Delay
+  echo -e "${border_color}├────────────────────────────────────────────────┤${reset_color}"
+  echo -e "${border_color}│${padding}${header_color}Check count: ${count}${padding}${reset_color}"
+  echo -e "${border_color}│${padding}Loop Delay: ${LOOP_DELAY} seconds${padding}${reset_color}"
+  
+  # Footer
+  echo -e "${border_color}└────────────────────────────────────────────────┘${reset_color}"
 }
 
-echo "DNSTT Keep-Alive script <Discord @civ3>"
-echo "DNS List:"
-for server in "${!SERVERS[@]}"; do
-    echo -e "\e[34m${server}\e[0m -> ${SERVERS["$server"]}"
-done
-echo "CTRL + C to close script"
+countdown() {
+    for i in 1 0; do
+        echo "Checking started in $i seconds..."
+        sleep 1
+    done
+}
 
-if [ "${LOOP_DELAY}" -eq 1 ]; then
-    let "LOOP_DELAY++"
-fi
-
+# Main loop
 while true; do
-    check
-    echo '.--. .-.. . .- ... .     .-- .- .. -'
-    sleep ${LOOP_DELAY}
+  countdown
+  clear
+  check
+  ((count++))  # Increment the counter
+  sleep $LOOP_DELAY || exit 1  # Exit if sleep fails
 done
+
+exit 0
