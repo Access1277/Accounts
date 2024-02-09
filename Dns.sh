@@ -14,6 +14,10 @@ read -a DNS_IPS
 echo -e "\e[1;37mEnter Your NameServers separated by ' ': \e[0m"
 read -a NAME_SERVERS
 
+echo -e "\e[1;37mEnter the timeout duration in seconds (default: 3): \e[0m"
+read -r TIMEOUT_DURATION
+TIMEOUT_DURATION=${TIMEOUT_DURATION:-3}
+
 LOOP_DELAY=1
 echo -e "\e[1;37mCurrent loop delay is \e[1;33m${LOOP_DELAY}\e[1;37m seconds.\e[0m"
 echo -e "\e[1;37mWould you like to change the loop delay? \e[1;36m[y/n]:\e[0m "
@@ -49,57 +53,29 @@ fi
 # Initialize the counter
 count=1
 
-check(){
-  local border_color="\e[95m"  # Light magenta color
-  local success_color="\e[92m"  # Light green color
-  local fail_color="\e[91m"    # Light red color
-  local header_color="\e[96m"  # Light cyan color
-  local reset_color="\e[0m"    # Reset to default terminal color
-  local padding="  "            # Padding for aesthetic
+check_dns() {
+  local dns_ip=$1
+  local nameserver=$2
+  local result=$(${_DIG} @${dns_ip} ${nameserver} +short)
+  if [ -z "$result" ]; then
+    echo -e "DNS IP: ${dns_ip}, NameServer: ${nameserver}, Status: Failed"
+  else
+    echo -e "DNS IP: ${dns_ip}, NameServer: ${nameserver}, Status: Success, IP: ${result}"
+  fi
+}
 
-  # Header
-  echo -e "${border_color}┌────────────────────────────────────────────────┐${reset_color}"
-  echo -e "${border_color}│${header_color}${padding}DNS Status Check Results${padding}${reset_color}"
-  echo -e "${border_color}├────────────────────────────────────────────────┤${reset_color}"
-  
-  # Results
-  for T in "${DNS_IPS[@]}"; do
-    for R in "${NAME_SERVERS[@]}"; do
-      result=$(${_DIG} @${T} ${R} +short)
-      if [ -z "$result" ]; then
-        STATUS="${fail_color}Failed${reset_color}"
-      else
-        STATUS="${success_color}Success${reset_color}"
-      fi
-      echo -e "${border_color}│${padding}${reset_color}DNS IP: ${T}${reset_color}"
-      echo -e "${border_color}│${padding}NameServer: ${R}${reset_color}"
-      echo -e "${border_color}│${padding}Status: ${STATUS}${reset_color}"
+check_all_dns() {
+  for dns_ip in "${DNS_IPS[@]}"; do
+    for nameserver in "${NAME_SERVERS[@]}"; do
+      check_dns "$dns_ip" "$nameserver"
     done
   done
-
-  # Check count and Loop Delay
-  echo -e "${border_color}├────────────────────────────────────────────────┤${reset_color}"
-  echo -e "${border_color}│${padding}${header_color}Check count: ${count}${padding}${reset_color}"
-  echo -e "${border_color}│${padding}Loop Delay: ${LOOP_DELAY} seconds${padding}${reset_color}"
-  
-  # Footer
-  echo -e "${border_color}└────────────────────────────────────────────────┘${reset_color}"
 }
-
-countdown() {
-    for i in 1 0; do
-        echo "Checking started in $i seconds..."
-        sleep 1
-    done
-}
-
-
-countdown
-  clear
 
 # Main loop
 while true; do
-  check
+  echo "Checking DNS statuses..."
+  check_all_dns
   ((count++))  # Increment the counter
   sleep $LOOP_DELAY
 done
