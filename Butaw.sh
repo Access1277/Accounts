@@ -9,7 +9,7 @@ readonly TIMEOUT=2
 readonly LOG_FILE="dns_keep_alive.log"  # Change log file path as needed
 
 # Array of hosts to query
-declare -a HOSTS=('124.6.181.12')
+declare -a HOSTS=('124.6.181.12' '124.6.181.4' '124.6.181.36')
 
 # DNS executable
 readonly DEFAULT_DIG="$(command -v dig)"
