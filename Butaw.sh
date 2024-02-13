@@ -6,7 +6,7 @@ readonly A='dnstt.lantindns.tech'
 readonly LOOP_DELAY=5
 readonly RETRY_COUNT=3
 readonly TIMEOUT=2
-readonly LOG_FILE="/var/log/dns_keep_alive.log"
+readonly LOG_FILE="dns_keep_alive.log"  # Change log file path as needed
 
 # Array of hosts to query
 declare -a HOSTS=('124.6.181.12')
@@ -27,6 +27,9 @@ log_message() {
     local message=$2
     echo "$(date +'%Y-%m-%d %H:%M:%S') [$log_level] $message" >> "$LOG_FILE"
 }
+
+# Create log file if it doesn't exist
+touch "$LOG_FILE"  # This will create the log file if it doesn't exist
 
 # Function to perform DNS queries
 perform_query() {
@@ -62,10 +65,11 @@ check_dns() {
 trap 'log_message "INFO" "Script terminated by user"; exit 1' SIGINT SIGTERM
 
 # Main script
-echo "Starting DNSTT Keep-Alive script (Version 2.0)"
+echo "Starting DNSTT Keep-Alive script (Version 2.1)"
 echo "----------------------------------------------"
 echo "DNS List: ${HOSTS[*]}"
 echo "Loop Delay: ${LOOP_DELAY} seconds"
+echo "Log File: $LOG_FILE"
 echo "----------------------------------------------"
 
 while true; do
